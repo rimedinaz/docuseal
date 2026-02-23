@@ -35,3 +35,15 @@ This directory contains a standalone Docker stack for running DocuSeal on a NAS 
 
 - **Domain**: Edit `docker-compose.yml` environment variable `DOMAIN_NAME` and `config/Caddyfile` if you have a real domain.
 - **Ports**: Edit `docker-compose.yml` to change exposed ports.
+
+## Bootstrap admin user (optional)
+
+Create/update an admin user for test environments:
+
+```bash
+docker cp ./standalone/scripts/bootstrap_admin.rb standalone-app-1:/tmp/bootstrap_admin.rb && \
+docker exec -e BOOTSTRAP_ADMIN_EMAIL="rimedinaz@gmail.com" \
+  -e BOOTSTRAP_ADMIN_PASSWORD="Secret123!" \
+  -e BOOTSTRAP_ADMIN_NAME="Richard Medina" \
+  standalone-app-1 sh -lc "cd /app && bundle exec rails runner /tmp/bootstrap_admin.rb"
+```
