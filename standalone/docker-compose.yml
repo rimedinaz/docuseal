@@ -2,23 +2,29 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: ..
-      dockerfile: standalone/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
-    image: docuseal-standalone:latest
+    image: docuseal/docuseal:latest
     restart: unless-stopped
-    ports:
-      - 3000:3000
+    expose:
+      - "3000"
     volumes:
       - docuseal_data:/data/docuseal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=blackender-net"
+      - "traefik.http.routers.docuseal.rule=Host(`docuseal.nas`)"
+      - "traefik.http.routers.docuseal.entrypoints=web"
+      - "traefik.http.services.docuseal.loadbalancer.server.port=3000"
     environment:
       - FORCE_SSL=${FORCE_SSL:-false}
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal
       - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-5}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    networks:
+      - default
+      - blackender-net
 
   postgres:
     image: postgres:16-alpine
@@ -38,6 +44,8 @@ services:
   caddy:
     image: caddy:latest
     restart: unless-stopped
+    profiles:
+      - standalone-caddy
     ports:
       - 80:80
       - 443:443
@@ -53,3 +61,7 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+
+networks:
+  blackender-net:
+    external: true
