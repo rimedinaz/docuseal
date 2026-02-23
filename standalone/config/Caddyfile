@@ -1,0 +1,10 @@
+{
+    # Global options
+}
+
+{$DOMAIN_NAME:localhost} {
+    reverse_proxy app:3000
+
+    # Use internal CA for self-signed certs to avoid external dependencies
+    tls internal
+}
